@@ -1,15 +1,17 @@
 // @flow
 import * as React from "react";
-import { useState } from "react";
+import {useState} from "react";
 import {
-  TextField,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Button,
-  DialogTitle,
-  Grid,
-} from "@material-ui/core";
+    Button,
+    Collapse,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    LinearProgress,
+    TextField,
+}                 from "@material-ui/core";
 
 type Props = {
   title?: string;
@@ -24,17 +26,20 @@ export function CreateOrEditScriptDialog(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <Dialog open={props.open} fullWidth>
-      <DialogTitle>Script</DialogTitle>
-      <DialogContent>
-        <Grid>
-          <TextField
-            label="Title"
-            fullWidth
-            value={title}
-            variant="filled"
-            onChange={(e) => setTitle(e.target.value)}
-          />
+      <Dialog open={props.open} fullWidth>
+          <Collapse in={isLoading}>
+              <LinearProgress/>
+          </Collapse>
+          <DialogTitle>Script</DialogTitle>
+          <DialogContent>
+              <Grid>
+                  <TextField
+                      label="Title"
+                      fullWidth
+                      value={title}
+                      variant="filled"
+                      onChange={(e) => setTitle(e.target.value)}
+                  />
         </Grid>
         <Grid>
           <TextField

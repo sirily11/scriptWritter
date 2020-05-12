@@ -1,9 +1,12 @@
-import React, { Component } from "react";
-import firebase, { User } from "firebase";
-import { Room, ScriptUser } from "./scriptWriterInterfaces";
+import React, {Component}           from "react";
+import firebase, {User}             from "firebase";
+import {Room, ScriptUser, Settings} from "./scriptWriterInterfaces";
+import {v4 as uuidv4}               from "uuid";
 
-interface State {
+interface State
+{
   user?: User | null;
+  room: Room[];
 
   signOut(): Promise<void>;
 
@@ -12,6 +15,49 @@ interface State {
   signUp(email: string, password: string): Promise<void>;
 
   createScript(title: string, description: string): Promise<void>;
+
+  createSettings(
+      title: string,
+      docsId: string,
+      settings: Settings[]
+  ): Promise<void>;
+
+  createDetails(
+      index: number,
+      docsId: string,
+      title: string,
+      content: string,
+      settings: Settings[]
+  ): Promise<void>;
+
+  updateSettings(
+      index: number,
+      docsId: string,
+      title: string,
+      settings: Settings[]
+  ): Promise<void>;
+
+  updateDetails(
+      index: number,
+      detailIndex: number,
+      docsId: string,
+      title: string,
+      content: string,
+      settings: Settings[]
+  ): Promise<void>;
+
+  deleteSettings(
+      index: number,
+      docsId: string,
+      settings: Settings[]
+  ): Promise<void>;
+
+  deleteDetails(
+      index: number,
+      detailIndex: number,
+      docsId: string,
+      settings: Settings[]
+  ): Promise<void>;
 }
 
 interface Props {}
@@ -29,33 +75,159 @@ export default class HomeProvider extends Component<Props, State> {
       login: this.login,
       signUp: this.signUp,
       createScript: this.createScript,
+      createDetails: this.createDetails,
+      createSettings: this.createSettings,
+      updateDetails: this.updateDetails,
+      updateSettings: this.updateSettings,
+      deleteDetails: this.deleteDetails,
+      deleteSettings: this.deleteSettings,
+      room: [],
     };
   }
 
-  componentDidMount() {
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        this.setState({ user: user });
+  async componentDidMount()
+  {
+    await firebase.firestore().enablePersistence();
+    firebase.auth().onAuthStateChanged(async (user) =>
+    {
+      if (user)
+      {
+        this.setState({user: user});
         let userInfo: ScriptUser = {
           username: user.displayName ?? "",
           userID: user.uid,
         };
         // Add user to firestore
         await firebase
-          .firestore()
-          .collection("users")
-          .doc(user.uid)
-          .set(userInfo);
-        window.location.href = "#home";
-      } else {
-        this.setState({ user: null });
+            .firestore()
+            .collection("users")
+            .doc(user.uid)
+            .set(userInfo);
+      } else
+      {
+        this.setState({user: null});
         window.location.href = "#";
       }
     });
+
+    firebase
+        .firestore()
+        .collection("scripts")
+        .onSnapshot((docs) =>
+        {
+          let data: Room[] = [];
+          docs.forEach((d) =>
+          {
+            data.push({id: d.id, ...d.data()} as Room);
+          });
+          this.setState({room: data});
+        });
   }
 
-  createScript = async (title: string, description: string) => {
+  createSettings = async (
+      title: string,
+      docsId: string,
+      settings: Settings[]
+  ) =>
+  {
+    settings.push({type: title, details: [], id: uuidv4()});
+    await firebase
+        .firestore()
+        .collection("scripts")
+        .doc(docsId)
+        .update("settings", settings);
+  };
+  createDetails = async (
+      index: number,
+      docsId: string,
+      title: string,
+      content: string,
+      settings: Settings[]
+  ) =>
+  {
+    settings[index].details.push({
+      title: title,
+      content: content,
+      id: uuidv4(),
+    });
+    await firebase
+        .firestore()
+        .collection("scripts")
+        .doc(docsId)
+        .update("settings", settings);
+  };
+  updateSettings = async (
+      index: number,
+      docsId: string,
+      title: string,
+      settings: Settings[]
+  ) =>
+  {
+    settings[index].type = title;
+    await firebase
+        .firestore()
+        .collection("scripts")
+        .doc(docsId)
+        .update("settings", settings);
+  };
+  updateDetails = async (
+      index: number,
+      detailIndex: number,
+      docsId: string,
+      title: string,
+      content: string,
+      settings: Settings[]
+  ) =>
+  {
+    settings[index].details[detailIndex].title = title;
+    settings[index].details[detailIndex].content = content;
+
+    await firebase
+        .firestore()
+        .collection("scripts")
+        .doc(docsId)
+        .update("settings", settings);
+  };
+  deleteSettings = async (
+      index: number,
+      docsId: string,
+      settings: Settings[]
+  ) =>
+  {
+    let confirm = window.confirm("Do you want to delete?");
+    if (confirm)
+    {
+      settings.splice(index, 1);
+      await firebase
+          .firestore()
+          .collection("scripts")
+          .doc(docsId)
+          .update("settings", settings);
+    }
+  };
+  deleteDetails = async (
+      index: number,
+      detailIndex: number,
+      docsId: string,
+      settings: Settings[]
+  ) =>
+  {
+    let confirm = window.confirm("Do you want to delete?");
+    if (confirm)
+    {
+      settings[index].details.splice(detailIndex);
+      await firebase
+          .firestore()
+          .collection("scripts")
+          .doc(docsId)
+          .update("settings", settings);
+    }
+  };
+
+  createScript = async (title: string, description: string) =>
+  {
     let scriptRoom: Room = {
+      admin: firebase.auth().currentUser?.uid ?? "",
       title: title,
       description: description,
       settings: [],
@@ -73,6 +245,7 @@ export default class HomeProvider extends Component<Props, State> {
   login = async (email: string, password: string) => {
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
+      window.location.href = "#home";
     } catch (e) {
       window.alert(e);
     }

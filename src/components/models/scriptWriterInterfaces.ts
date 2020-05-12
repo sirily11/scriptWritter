@@ -5,6 +5,7 @@ export interface Room {
   cover?: string;
   settings: Settings[];
   content: Content[];
+  admin: string;
 }
 
 export interface ScriptUser {
@@ -18,12 +19,16 @@ export interface Content {
   content: string;
 }
 
-export interface Settings {
+export interface Settings
+{
+  id: string;
   type: string;
   details: SettingsDetail[];
 }
 
-export interface SettingsDetail {
+export interface SettingsDetail
+{
+  id: string;
   title: string;
   content?: string;
 }
