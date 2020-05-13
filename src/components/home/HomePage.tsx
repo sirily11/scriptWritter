@@ -1,6 +1,6 @@
 // @flow
-import * as React                 from "react";
-import {useEffect, useState}      from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import {
   AppBar,
   Card,
@@ -11,12 +11,12 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-}                                 from "@material-ui/core";
-import ExitToAppIcon              from "@material-ui/icons/ExitToApp";
-import {HomeContext}              from "../models/HomeContext";
-import AddIcon                    from "@material-ui/icons/Add";
-import {makeStyles}               from "@material-ui/core/styles";
-import {CreateOrEditScriptDialog} from "./CreateOrEditScriptDialog";
+} from "@material-ui/core";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import { HomeContext } from "../models/HomeContext";
+import AddIcon from "@material-ui/icons/Add";
+import { makeStyles } from "@material-ui/core/styles";
+import { CreateOrEditScriptDialog } from "./CreateOrEditScriptDialog";
 
 type Props = {};
 
@@ -42,7 +42,7 @@ const useStyle = makeStyles({
 });
 
 export function HomePage(props: Props) {
-  const {user, signOut, createScript, room} = React.useContext(HomeContext);
+  const { user, signOut, createScript, room } = React.useContext(HomeContext);
   const [openDialog, setOpenDialog] = useState(false);
   const classes = useStyle();
 
@@ -72,35 +72,34 @@ export function HomePage(props: Props) {
               <Card className={classes.card}>
                 <div className={classes.addIconContainer}>
                   <IconButton
-                      className={classes.addIcon}
-                      onClick={() => setOpenDialog(true)}
+                    className={classes.addIcon}
+                    onClick={() => setOpenDialog(true)}
                   >
-                    <AddIcon/>
+                    <AddIcon />
                   </IconButton>
                 </div>
               </Card>
             </Tooltip>
           </Grid>
           {room.map((r, i) => (
-              <Grid key={`room-${i}`} item xs={6} md={3} lg={2}>
-                <Card className={classes.card}>
-                  <CardActionArea
-                      onClick={() =>
-                      {
-                        window.location.href = "#room/" + r.id;
-                      }}
-                  >
-                    <div className={classes.addIconContainer}>
-                      <div className={classes.addIcon}>
-                        <Typography variant="h5">{r.title}</Typography>
-                        <Typography noWrap style={{maxWidth: 150}}>
-                          {r.description}
-                        </Typography>
-                      </div>
+            <Grid key={`room-${i}`} item xs={6} md={3} lg={2}>
+              <Card className={classes.card}>
+                <CardActionArea
+                  onClick={() => {
+                    window.location.href = "#room/" + r.id;
+                  }}
+                >
+                  <div className={classes.addIconContainer}>
+                    <div className={classes.addIcon}>
+                      <Typography variant="h5">{r.title}</Typography>
+                      <Typography noWrap style={{ maxWidth: 150 }}>
+                        {r.description}
+                      </Typography>
                     </div>
-                  </CardActionArea>
-                </Card>
-              </Grid>
+                  </div>
+                </CardActionArea>
+              </Card>
+            </Grid>
           ))}
         </Grid>
       </Container>

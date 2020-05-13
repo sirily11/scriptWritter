@@ -20,15 +20,13 @@ export interface Content {
   content: string;
 }
 
-export interface Settings
-{
+export interface Settings {
   id: string;
   type: string;
   details: SettingsDetail[];
 }
 
-export interface SettingsDetail
-{
+export interface SettingsDetail {
   id: string;
   title: string;
   content?: string;

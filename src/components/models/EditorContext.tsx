@@ -1,9 +1,8 @@
-import React, {Component}        from "react";
-import {Editor, Node}            from "slate";
-import {Content, SettingsDetail} from "./scriptWriterInterfaces";
+import React, { Component } from "react";
+import { Editor, Node } from "slate";
+import { Content, SettingsDetail } from "./scriptWriterInterfaces";
 
-interface State
-{
+interface State {
   value: Node[];
   selectedContent?: Content;
 
@@ -16,25 +15,21 @@ interface State
   clear(editor?: Editor): void;
 }
 
-interface Props
-{
-}
+interface Props {}
 
 //@ts-ignore
 const context: State = {};
 
 export const EditorContext = React.createContext(context);
 
-export default class EditorProvider extends Component<Props, State>
-{
-  constructor(props: Props)
-  {
+export default class EditorProvider extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       value: [
         {
           type: "paragraph",
-          children: [{text: ""}],
+          children: [{ text: "" }],
         },
       ],
       onChange: this.onChange,
@@ -44,56 +39,48 @@ export default class EditorProvider extends Component<Props, State>
     };
   }
 
-  onChange = (value: Node[]) =>
-  {
-    this.setState({value});
+  onChange = (value: Node[]) => {
+    this.setState({ value });
   };
 
-  setSelectedContent = (content?: Content, editor?: Editor) =>
-  {
-    if (content)
-    {
+  setSelectedContent = (content?: Content, editor?: Editor) => {
+    if (content) {
       let value = content.content;
-      this.setState({value: value as any});
-    } else
-    {
+      this.setState({ value: value as any });
+    } else {
       this.clear(editor);
     }
-    this.setState({selectedContent: content});
+    this.setState({ selectedContent: content });
   };
 
-  insertSettings = (settings: SettingsDetail, editor: Editor) =>
-  {
+  insertSettings = (settings: SettingsDetail, editor: Editor) => {
     const node: Node = {
       type: "settings",
-      children: [{text: ""}],
-      data: {id: settings.id},
+      children: [{ text: "" }],
+      data: { id: settings.id },
     };
     editor.insertNode(node);
     // value.push(node);
     // this.setState({ value });
   };
 
-  clear = (editor?: Editor) =>
-  {
-    if (editor)
-    {
+  clear = (editor?: Editor) => {
+    if (editor) {
       editor.selection = {
-        anchor: {path: [0, 0], offset: 0},
-        focus: {path: [0, 0], offset: 0},
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
       };
     }
     this.setState({
-      value: [{type: "paragraph", children: [{text: " "}]}],
+      value: [{ type: "paragraph", children: [{ text: " " }] }],
     });
   };
 
-  render()
-  {
+  render() {
     return (
-        <EditorContext.Provider value={this.state}>
-          {this.props.children}
-        </EditorContext.Provider>
+      <EditorContext.Provider value={this.state}>
+        {this.props.children}
+      </EditorContext.Provider>
     );
   }
 }
