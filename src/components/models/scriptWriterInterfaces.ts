@@ -14,6 +14,7 @@ export interface ScriptUser {
 }
 
 export interface Content {
+  id: string;
   time: any;
   user: ScriptUser;
   content: string;

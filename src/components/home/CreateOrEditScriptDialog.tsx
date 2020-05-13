@@ -40,16 +40,16 @@ export function CreateOrEditScriptDialog(props: Props) {
                       variant="filled"
                       onChange={(e) => setTitle(e.target.value)}
                   />
-        </Grid>
-        <Grid>
-          <TextField
-            style={{ marginTop: 10 }}
-            label="Description"
-            multiline
-            rows={10}
-            fullWidth
-            value={desc}
-            variant="filled"
+              </Grid>
+              <Grid>
+                  <TextField
+                      style={{marginTop: 10}}
+                      label="Description"
+                      multiline
+                      rows={10}
+                      fullWidth
+                      value={desc}
+                      variant="filled"
             onChange={(e) => setDesc(e.target.value)}
           />
         </Grid>

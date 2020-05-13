@@ -8,6 +8,7 @@ import {blue, grey}                                 from "@material-ui/core/colo
 import HomeProvider                                 from "./components/models/HomeContext";
 import {HomePage}                                   from "./components/home/HomePage";
 import {RoomPage}                                   from "./components/room/RoomPage";
+import EditorProvider                               from "./components/models/EditorContext";
 
 const theme = createMuiTheme({
   palette: {
@@ -22,19 +23,21 @@ function App()
   return (
       <ThemeProvider theme={theme}>
         <CssBaseline/>
-        <HomeProvider>
-          <Router>
-            <Switch>
-              <Route path="/" exact>
-                <LoginPage/>
-              </Route>
-              <Route path="/home" exact>
-                <HomePage/>
-              </Route>
-              <Route path="/room/:id" exact component={RoomPage}/>
-            </Switch>
-          </Router>
-        </HomeProvider>
+        <EditorProvider>
+          <HomeProvider>
+            <Router>
+              <Switch>
+                <Route path="/" exact>
+                  <LoginPage/>
+                </Route>
+                <Route path="/home" exact>
+                  <HomePage/>
+                </Route>
+                <Route path="/room/:id" exact component={RoomPage}/>
+              </Switch>
+            </Router>
+          </HomeProvider>
+        </EditorProvider>
       </ThemeProvider>
   );
 }

@@ -1,12 +1,25 @@
-import React, {Component}           from "react";
-import firebase, {User}             from "firebase";
-import {Room, ScriptUser, Settings} from "./scriptWriterInterfaces";
-import {v4 as uuidv4}               from "uuid";
+import React, {Component}                    from "react";
+import firebase, {User}                      from "firebase";
+import {Content, Room, ScriptUser, Settings} from "./scriptWriterInterfaces";
+import {v4 as uuidv4}                        from "uuid";
 
 interface State
 {
   user?: User | null;
   room: Room[];
+
+  post(docsId: string, value: any): Promise<void>;
+
+  editScript(docsId: string, title: string, description: string): Promise<void>;
+
+  editPost(
+      docsId: string,
+      contentId: string,
+      newValue: any,
+      oldContents: Content[]
+  ): Promise<void>;
+
+  deletePost(docsId: string, value: Content): Promise<void>;
 
   signOut(): Promise<void>;
 
@@ -81,6 +94,10 @@ export default class HomeProvider extends Component<Props, State> {
       updateSettings: this.updateSettings,
       deleteDetails: this.deleteDetails,
       deleteSettings: this.deleteSettings,
+      editScript: this.editScript,
+      editPost: this.editPost,
+      post: this.post,
+      deletePost: this.deletePost,
       room: [],
     };
   }
@@ -123,6 +140,74 @@ export default class HomeProvider extends Component<Props, State> {
           this.setState({room: data});
         });
   }
+
+  post = async (docsId: string, value: any) =>
+  {
+    let content: Content = {
+      id: uuidv4(),
+      time: firebase.firestore.Timestamp.fromMillis(Date.now()),
+      content: value,
+      user: {
+        username: firebase.auth().currentUser?.displayName ?? "",
+        userID: firebase.auth().currentUser?.uid ?? "",
+      },
+    };
+    await firebase
+        .firestore()
+        .collection("scripts")
+        .doc(docsId)
+        .update("content", firebase.firestore.FieldValue.arrayUnion(content));
+  };
+
+  editPost = async (
+      docsId: string,
+      contentId: string,
+      newValue: any,
+      oldContents: Content[]
+  ) =>
+  {
+    let contents = oldContents.filter((c) => c.id === contentId);
+    if (contents)
+    {
+      contents[0].content = newValue;
+    }
+    let docs = await firebase.firestore().collection("scripts").doc(docsId);
+    let snapshot = await docs.get();
+    let currentUserId = firebase.auth().currentUser?.uid;
+    let data = snapshot.data() as Room;
+    if (
+        data.admin === currentUserId ||
+        contents[0].user.userID === currentUserId
+    )
+    {
+      docs.update("content", oldContents);
+    } else
+    {
+      alert("You cannot update this content");
+    }
+  };
+
+  deletePost = async (docsId: string, value: Content) =>
+  {
+    let confirm = window.confirm("Do you want to delete this post?");
+    if (confirm)
+    {
+      let docs = await firebase.firestore().collection("scripts").doc(docsId);
+      let snapshot = await docs.get();
+      let currentUserId = firebase.auth().currentUser?.uid;
+      let data = snapshot.data() as Room;
+      if (data.admin === currentUserId || value.user.userID === currentUserId)
+      {
+        docs.update(
+            "content",
+            firebase.firestore.FieldValue.arrayRemove(value)
+        );
+      } else
+      {
+        alert("You cannot delete this content");
+      }
+    }
+  };
 
   createSettings = async (
       title: string,
@@ -236,14 +321,23 @@ export default class HomeProvider extends Component<Props, State> {
     await firebase.firestore().collection("scripts").add(scriptRoom);
   };
 
-  signOut = async () => {
+  editScript = async (docsId: string, title: string, description: string) =>
+  {
+    let docs = firebase.firestore().collection("scripts").doc(docsId);
+    await docs.update({title: title, description: description});
+  };
+
+  signOut = async () =>
+  {
     await firebase.auth().signOut();
-    this.setState({ user: null });
+    this.setState({user: null});
     window.location.href = "#";
   };
 
-  login = async (email: string, password: string) => {
-    try {
+  login = async (email: string, password: string) =>
+  {
+    try
+    {
       await firebase.auth().signInWithEmailAndPassword(email, password);
       window.location.href = "#home";
     } catch (e) {

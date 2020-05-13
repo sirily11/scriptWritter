@@ -9,8 +9,8 @@ import ExpandMoreIcon                                                   from "@m
 import ChevronRightIcon                                                 from "@material-ui/icons/ChevronRight";
 import EditIcon                                                         from "@material-ui/icons/Edit";
 import DeleteIcon                                                       from "@material-ui/icons/Delete";
-import {CreateOrAddSettingsDialog}                                      from "./CreateOrAddSettingsDialog";
-import {CreateOrAddDetailsDialog}                                       from "./CreateOrAddDetailsDialog";
+import {CreateOrAddSettingsDialog}                                      from "./dialogs/CreateOrAddSettingsDialog";
+import {CreateOrAddDetailsDialog}                                       from "./dialogs/CreateOrAddDetailsDialog";
 import {makeStyles}                                                     from "@material-ui/core/styles";
 
 const useStyle = makeStyles({

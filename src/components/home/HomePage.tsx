@@ -93,7 +93,9 @@ export function HomePage(props: Props) {
                     <div className={classes.addIconContainer}>
                       <div className={classes.addIcon}>
                         <Typography variant="h5">{r.title}</Typography>
-                        <Typography>{r.description}</Typography>
+                        <Typography noWrap style={{maxWidth: 150}}>
+                          {r.description}
+                        </Typography>
                       </div>
                     </div>
                   </CardActionArea>
