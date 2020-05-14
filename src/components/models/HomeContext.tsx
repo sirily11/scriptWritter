@@ -276,7 +276,8 @@ export default class HomeProvider extends Component<Props, State> {
   ) => {
     let confirm = window.confirm("Do you want to delete?");
     if (confirm) {
-      settings[index].details.splice(detailIndex);
+      settings[index].details.splice(detailIndex, 1);
+      debugger;
       await firebase
         .firestore()
         .collection("scripts")

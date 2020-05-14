@@ -13,7 +13,7 @@ import {
 import { Room } from "../../models/scriptWriterInterfaces";
 import { makeStyles } from "@material-ui/core/styles";
 import { EditorContext } from "../../models/EditorContext";
-import { createEditor } from "slate";
+import { createEditor, Editor, Range } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import { HomeContext } from "../../models/HomeContext";
 import { BlockRender, withSettings } from "./ContentDisplay";
@@ -94,6 +94,8 @@ export function EditorPanel(props: Props) {
             editor={editor}
             value={value}
             onChange={(v) => {
+              const { selection } = editor;
+
               onChange(v);
             }}
           >
