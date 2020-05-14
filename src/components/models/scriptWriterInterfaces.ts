@@ -1,16 +1,19 @@
 export interface Room {
-  title: string;
-  description: string;
-  id?: string;
-  cover?: string;
-  settings: Settings[];
-  content: Content[];
-  admin: string;
+    title: string;
+    description: string;
+    id?: string;
+    cover?: string;
+    settings: Settings[];
+    content: Content[];
+    currentUsers: ScriptUser[];
+    admin: string;
 }
 
-export interface ScriptUser {
-  username: string;
-  userID: string;
+export interface ScriptUser
+{
+    username: string;
+    userID: string;
+    currentTyping?: string;
 }
 
 export interface Content {

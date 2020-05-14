@@ -17,14 +17,16 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/slate-react": "^0.22.9",
     "@types/uuid": "^7.0.3",
+    "awesome-debounce-promise": "^2.1.0",
     "firebase": "^7.14.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "slate": "^0.58.1",
+    "slate-history": "^0.58.1",
     "slate-react": "^0.58.1",
-    "typescript": "^3.8.3",
+    "typescript": "3.9.2",
     "uuid": "^8.0.0"
   },
   "scripts": {

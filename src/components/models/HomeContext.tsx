@@ -1,9 +1,10 @@
-import React, { Component } from "react";
-import firebase, { User } from "firebase";
-import { Content, Room, ScriptUser, Settings } from "./scriptWriterInterfaces";
-import { v4 as uuidv4 } from "uuid";
+import React, {Component}                    from "react";
+import firebase, {User}                      from "firebase";
+import {Content, Room, ScriptUser, Settings} from "./scriptWriterInterfaces";
+import {v4 as uuidv4}                        from "uuid";
 
-interface State {
+interface State
+{
   user?: User | null;
   room: Room[];
 
@@ -102,7 +103,7 @@ export default class HomeProvider extends Component<Props, State> {
   }
 
   async componentDidMount() {
-    await firebase.firestore().enablePersistence();
+    // await firebase.firestore().enablePersistence();
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         this.setState({ user: user });
@@ -112,26 +113,28 @@ export default class HomeProvider extends Component<Props, State> {
         };
         // Add user to firestore
         await firebase
-          .firestore()
-          .collection("users")
-          .doc(user.uid)
-          .set(userInfo);
+            .firestore()
+            .collection("users")
+            .doc(user.uid)
+            .set(userInfo);
+
+        firebase
+            .firestore()
+            .collection("scripts")
+            .onSnapshot((docs) =>
+            {
+              let data: Room[] = [];
+              docs.forEach((d) =>
+              {
+                data.push({id: d.id, ...d.data()} as Room);
+              });
+              this.setState({room: data});
+            });
       } else {
         this.setState({ user: null });
         window.location.href = "#";
       }
     });
-
-    firebase
-      .firestore()
-      .collection("scripts")
-      .onSnapshot((docs) => {
-        let data: Room[] = [];
-        docs.forEach((d) => {
-          data.push({ id: d.id, ...d.data() } as Room);
-        });
-        this.setState({ room: data });
-      });
   }
 
   post = async (docsId: string, value: any) => {
@@ -244,6 +247,7 @@ export default class HomeProvider extends Component<Props, State> {
     content: string,
     settings: Settings[]
   ) => {
+    console.log(settings, index, detailIndex);
     settings[index].details[detailIndex].title = title;
     settings[index].details[detailIndex].content = content;
 
@@ -258,7 +262,7 @@ export default class HomeProvider extends Component<Props, State> {
     docsId: string,
     settings: Settings[]
   ) => {
-    let confirm = window.confirm("Do you want to delete?");
+    let confirm = window.confirm("Do you want to delete this setting?");
     if (confirm) {
       settings.splice(index, 1);
       await firebase
@@ -274,10 +278,9 @@ export default class HomeProvider extends Component<Props, State> {
     docsId: string,
     settings: Settings[]
   ) => {
-    let confirm = window.confirm("Do you want to delete?");
+    let confirm = window.confirm("Do you want to delete this detail?");
     if (confirm) {
       settings[index].details.splice(detailIndex, 1);
-      debugger;
       await firebase
         .firestore()
         .collection("scripts")
@@ -293,6 +296,7 @@ export default class HomeProvider extends Component<Props, State> {
       description: description,
       settings: [],
       content: [],
+      currentUsers: [],
     };
     await firebase.firestore().collection("scripts").add(scriptRoom);
   };

@@ -1,67 +1,144 @@
-import React, { Component } from "react";
-import { Editor, Node } from "slate";
-import { Content, SettingsDetail } from "./scriptWriterInterfaces";
+import React, {Component}                    from "react";
+import {Editor, Node}                        from "slate";
+import AwesomeDebouncePromise                from "awesome-debounce-promise";
+import {Content, ScriptUser, SettingsDetail} from "./scriptWriterInterfaces";
+import firebase                              from "firebase";
 
-interface State {
+interface State
+{
   value: Node[];
   selectedContent?: Content;
 
-  onChange(value: Node[]): void;
+  onChange(value: Node[], docsId: string, currentUsers: ScriptUser[]): void;
 
   insertSettings(settings: SettingsDetail, editor: Editor): void;
 
   setSelectedContent(content?: Content, editor?: Editor): void;
 
+  onSendEnd(docsId: string, currentUsers: ScriptUser[]): Promise<void>;
+
   clear(editor?: Editor): void;
 }
 
-interface Props {}
+interface Props
+{
+}
 
 //@ts-ignore
 const context: State = {};
 
+const asyncFunctionDebounced = AwesomeDebouncePromise(async (text: Node[]) =>
+{
+  let pureText = "";
+  text.forEach((t, i) =>
+  {
+    (t.children as []).forEach((c: { text: string; data?: any }) =>
+    {
+      pureText += c?.text ?? "";
+      pureText += c?.data?.text ?? "";
+    });
+    if (i < text.length - 1)
+    {
+      pureText += "\n";
+    }
+  });
+  return pureText;
+}, 500);
+
 export const EditorContext = React.createContext(context);
 
-export default class EditorProvider extends Component<Props, State> {
-  constructor(props: Props) {
+export default class EditorProvider extends Component<Props, State>
+{
+  constructor(props: Props)
+  {
     super(props);
     this.state = {
       value: [
         {
           type: "paragraph",
-          children: [{ text: "" }],
+          children: [{text: ""}],
         },
       ],
       onChange: this.onChange,
+      onSendEnd: this.onSendEnd,
       insertSettings: this.insertSettings,
       setSelectedContent: this.setSelectedContent,
       clear: this.clear,
     };
   }
 
-  onChange = (value: Node[]) => {
-    this.setState({ value });
+  onSendEnd = async (docsId: string, currentUsers: ScriptUser[]) =>
+  {
+    let user = this.getUserInfo();
+    let doc = firebase.firestore().collection("scripts").doc(docsId);
+    let foundUsers = currentUsers.filter((c) => c.userID === user?.userID);
+    if (foundUsers.length > 0)
+    {
+      let foundUser = foundUsers[0];
+      //@ts-ignore
+      foundUser.currentTyping = null;
+      await doc.update({currentUsers: currentUsers});
+    }
   };
 
-  setSelectedContent = (content?: Content, editor?: Editor) => {
-    if (content) {
+  onChange = async (
+      value: Node[],
+      docsId: string,
+      currentUsers: ScriptUser[]
+  ) =>
+  {
+    this.setState({value});
+    let text = await asyncFunctionDebounced(value);
+    if (text.length > 0)
+    {
+      let user = this.getUserInfo();
+      let doc = firebase.firestore().collection("scripts").doc(docsId);
+      let foundUsers = currentUsers.filter((c) => c.userID === user?.userID);
+      if (foundUsers.length > 0)
+      {
+        let foundUser = foundUsers[0];
+        foundUser.currentTyping = text;
+        await doc.update({currentUsers: currentUsers});
+      }
+    } else
+    {
+      await this.onSendEnd(docsId, currentUsers);
+    }
+  };
+
+  getUserInfo = () =>
+  {
+    let currentUser = firebase.auth().currentUser;
+    if (currentUser)
+    {
+      let userInfo: ScriptUser = {
+        username: currentUser.displayName ?? "annoymous",
+        userID: currentUser.uid,
+      };
+      return userInfo;
+    }
+  };
+
+  setSelectedContent = (content?: Content, editor?: Editor) =>
+  {
+    if (content)
+    {
       let value = content.content;
-      this.setState({ value: value as any });
-    } else {
+      this.setState({value: value as any});
+    } else
+    {
       this.clear(editor);
     }
-    this.setState({ selectedContent: content });
+    this.setState({selectedContent: content});
   };
 
   insertSettings = (settings: SettingsDetail, editor: Editor) => {
     const node: Node = {
       type: "settings",
-      children: [{ text: "" }],
-      data: { id: settings.id },
+      children: [{text: settings.title}],
+      data: {id: settings.id, text: settings.title},
     };
     editor.insertNode(node);
-    // value.push(node);
-    // this.setState({ value });
   };
 
   clear = (editor?: Editor) => {

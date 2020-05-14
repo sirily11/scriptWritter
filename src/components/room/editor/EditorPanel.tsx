@@ -1,22 +1,17 @@
 // @flow
-import * as React from "react";
-import { useContext, useMemo, useState } from "react";
-import {
-  Button,
-  Chip,
-  Collapse,
-  Grid,
-  LinearProgress,
-  Paper,
-  Typography,
-} from "@material-ui/core";
-import { Room } from "../../models/scriptWriterInterfaces";
-import { makeStyles } from "@material-ui/core/styles";
-import { EditorContext } from "../../models/EditorContext";
-import { createEditor, Editor, Range } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
-import { HomeContext } from "../../models/HomeContext";
-import { BlockRender, withSettings } from "./ContentDisplay";
+import * as React                                                                      from "react";
+import {useCallback, useContext, useEffect, useMemo, useState}                         from "react";
+import {Button, Chip, Collapse, Grid, LinearProgress, Paper, PopperProps, Typography,} from "@material-ui/core";
+import {Room}                                                                          from "../../models/scriptWriterInterfaces";
+import {makeStyles}                                                                    from "@material-ui/core/styles";
+import {EditorContext}                                                                 from "../../models/EditorContext";
+import {createEditor, Range}                                                           from "slate";
+import {Editable, Slate, withReact}                                                    from "slate-react";
+import {HomeContext}                                                                   from "../../models/HomeContext";
+import {BlockRender}                                                                   from "./ContentDisplay";
+import {withSettings}                                                                  from "./plugins/withSettings";
+import {withShortcuts}                                                                 from "./plugins/withShortCusts";
+import {withHistory}                                                                   from "slate-history";
 
 type Props = { room: Room };
 
@@ -46,11 +41,20 @@ const useStyle = makeStyles({
   },
 });
 
-export function EditorPanel(props: Props) {
+export function EditorPanel(props: Props)
+{
   const classes = useStyle();
-  const { room } = props;
+  const {room} = props;
+  // States
   const [isLoading, setIsLoading] = useState(false);
-  const editor = useMemo(() => withSettings(withReact(createEditor())), []);
+  const [target, setTarget] = useState<Range>();
+  const [anchorEl, setAnchorEl] = React.useState<PopperProps["anchorEl"]>(null);
+  // end states
+  const editor = useMemo(
+      () => withHistory(withShortcuts(withSettings(withReact(createEditor())))),
+      []
+  );
+  // contexts
   const {
     value,
     onChange,
@@ -58,22 +62,38 @@ export function EditorPanel(props: Props) {
     clear,
     setSelectedContent,
     selectedContent,
+    onSendEnd,
   } = useContext(EditorContext);
-  const { post, editPost } = useContext(HomeContext);
-  // @ts-ignore
-  const DefaultElement = (props) => {
-    return <p {...props.attributes}>{props.children}</p>;
-  };
+  const {post, editPost} = useContext(HomeContext);
+  // end context
+
+  // render custom element
+  const renderElement = useCallback(
+      (p) =>
+      {
+        let np = {...p, room: room};
+        return <BlockRender {...np} />;
+      },
+      [room]
+  );
+
+  useEffect(() =>
+  {
+    return () =>
+    {
+      clear();
+    };
+  }, []);
 
   return (
-    <Paper className={classes.editor}>
-      <Collapse in={isLoading} mountOnEnter unmountOnExit>
-        <LinearProgress />
-      </Collapse>
-      <Grid container>
-        <Grid item xs={4} className={classes.chipContainer}>
-          {props.room.settings.map((s, i) => (
-            <div key={`sc-${i}`}>
+      <Paper className={classes.editor}>
+        <Collapse in={isLoading} mountOnEnter unmountOnExit>
+          <LinearProgress/>
+        </Collapse>
+        <Grid container>
+          <Grid item xs={4} className={classes.chipContainer}>
+            {props.room.settings.map((s, i) => (
+                <div key={`sc-${i}`}>
               <Typography>{s.type}</Typography>
               {s.details.map((sd, i) => (
                 <Chip
@@ -93,18 +113,15 @@ export function EditorPanel(props: Props) {
           <Slate
             editor={editor}
             value={value}
-            onChange={(v) => {
-              const { selection } = editor;
-
-              onChange(v);
+            onChange={(v) =>
+            {
+              if (props.room.id)
+                onChange(v, props.room.id, props.room.currentUsers);
             }}
           >
             <Editable
-              className={classes.mainEditor}
-              renderElement={(p) => {
-                let np = { ...p, room: room };
-                return <BlockRender {...np} />;
-              }}
+                className={classes.mainEditor}
+                renderElement={renderElement}
             />
           </Slate>
           <Grid
@@ -122,8 +139,13 @@ export function EditorPanel(props: Props) {
             >
               <Button
                 variant="contained"
-                onClick={async () => {
+                onClick={async () =>
+                {
                   setSelectedContent(undefined);
+                  if (props.room.id)
+                  {
+                    await onSendEnd(props.room.id, props.room.currentUsers);
+                  }
                 }}
               >
                 Cancel
@@ -137,16 +159,21 @@ export function EditorPanel(props: Props) {
                   if (selectedContent) {
                     await editPost(
                       props.room.id,
-                      selectedContent.id,
-                      value,
-                      props.room.content
+                        selectedContent.id,
+                        value,
+                        props.room.content
                     );
                     setSelectedContent(undefined);
-                  } else {
+                  } else
+                  {
                     await post(props.room.id, value);
                   }
                 }
                 await clear(editor);
+                if (props.room.id)
+                {
+                  await onSendEnd(props.room.id, props.room.currentUsers);
+                }
                 setIsLoading(false);
               }}
             >

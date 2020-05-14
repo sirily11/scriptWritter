@@ -1,24 +1,17 @@
-import { Settings, SettingsDetail } from "../models/scriptWriterInterfaces";
-import * as React from "react";
-import { useContext, useState } from "react";
-import { HomeContext } from "../models/HomeContext";
-import {
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import { TreeItem, TreeView } from "@material-ui/lab";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { CreateOrAddSettingsDialog } from "./dialogs/CreateOrAddSettingsDialog";
-import { CreateOrAddDetailsDialog } from "./dialogs/CreateOrAddDetailsDialog";
-import { makeStyles } from "@material-ui/core/styles";
+import {Settings, SettingsDetail}                                       from "../models/scriptWriterInterfaces";
+import * as React                                                       from "react";
+import {useContext, useState}                                           from "react";
+import {HomeContext}                                                    from "../models/HomeContext";
+import {IconButton, List, ListItem, ListItemText, Tooltip, Typography,} from "@material-ui/core";
+import AddIcon                                                          from "@material-ui/icons/Add";
+import {TreeItem, TreeView}                                             from "@material-ui/lab";
+import ExpandMoreIcon                                                   from "@material-ui/icons/ExpandMore";
+import ChevronRightIcon                                                 from "@material-ui/icons/ChevronRight";
+import EditIcon                                                         from "@material-ui/icons/Edit";
+import DeleteIcon                                                       from "@material-ui/icons/Delete";
+import {CreateOrAddSettingsDialog}                                      from "./dialogs/CreateOrAddSettingsDialog";
+import {CreateOrAddDetailsDialog}                                       from "./dialogs/CreateOrAddDetailsDialog";
+import {makeStyles}                                                     from "@material-ui/core/styles";
 
 const useStyle = makeStyles({
   title: {
@@ -150,9 +143,15 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
           title={selectedSettings?.type}
           onClose={async (title) => {
             if (title && props.id && props.settings) {
-              if (selectedSettings) {
-                let index = props.settings.indexOf(selectedSettings);
-                await updateSettings(index, props.id, title, props.settings);
+              if (selectedSettings)
+              {
+                let index = props.settings.findIndex(
+                    (s) => s.id === selectedSettings.id
+                );
+                if (index > -1)
+                {
+                  await updateSettings(index, props.id, title, props.settings);
+                }
               } else {
                 await createSettings(title, props.id, props.settings);
               }
@@ -174,12 +173,23 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
               selectedDetails &&
               props.id &&
               props.settings
-            ) {
-              let index = props.settings.indexOf(selectedSettings);
-              let detailIndex = selectedSettings.details.indexOf(
-                selectedDetails
+            )
+            {
+              let index = props.settings.findIndex(
+                  (s) => s.id === selectedSettings.id
               );
-              await deleteDetails(index, detailIndex, props.id, props.settings);
+              let detailIndex = selectedSettings.details.findIndex(
+                  (d) => d.id === selectedDetails.id
+              );
+              if (detailIndex > -1)
+              {
+                await deleteDetails(
+                    index,
+                    detailIndex,
+                    props.id,
+                    props.settings
+                );
+              }
             }
 
             setShowAddDetails(false);
@@ -193,20 +203,27 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
               props.id &&
               props.settings &&
               selectedSettings
-            ) {
-              let index = props.settings.indexOf(selectedSettings);
-              if (selectedDetails) {
-                let detailIndex = selectedSettings.details.indexOf(
-                  selectedDetails
+            )
+            {
+              let index = props.settings.findIndex(
+                  (s) => s.id === selectedSettings.id
+              );
+              if (selectedDetails)
+              {
+                let detailIndex = selectedSettings.details.findIndex(
+                    (d) => d.id === selectedDetails.id
                 );
-                await updateDetails(
-                  index,
-                  detailIndex,
-                  props.id,
-                  title,
-                  content,
-                  props.settings
-                );
+                if (detailIndex > -1)
+                {
+                  await updateDetails(
+                      index,
+                      detailIndex,
+                      props.id,
+                      title,
+                      content,
+                      props.settings
+                  );
+                }
               } else {
                 await createDetails(
                   index,
