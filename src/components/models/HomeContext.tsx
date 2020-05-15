@@ -7,16 +7,19 @@ interface State
 {
   user?: User | null;
   room: Room[];
+  isLoading: boolean;
+
+  refreshRoom(): Promise<void>;
 
   post(docsId: string, value: any): Promise<void>;
 
   editScript(docsId: string, title: string, description: string): Promise<void>;
 
   editPost(
-    docsId: string,
-    contentId: string,
-    newValue: any,
-    oldContents: Content[]
+      docsId: string,
+      contentId: string,
+      newValue: any,
+      oldContents: Content[]
   ): Promise<void>;
 
   deletePost(docsId: string, value: Content): Promise<void>;
@@ -85,6 +88,7 @@ export default class HomeProvider extends Component<Props, State> {
     super(props);
     this.state = {
       signOut: this.signOut,
+      isLoading: false,
       login: this.login,
       signUp: this.signUp,
       createScript: this.createScript,
@@ -98,6 +102,7 @@ export default class HomeProvider extends Component<Props, State> {
       editPost: this.editPost,
       post: this.post,
       deletePost: this.deletePost,
+      refreshRoom: this.refresh,
       room: [],
     };
   }
@@ -105,8 +110,9 @@ export default class HomeProvider extends Component<Props, State> {
   async componentDidMount() {
     // await firebase.firestore().enablePersistence();
     firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        this.setState({ user: user });
+      if (user)
+      {
+        this.setState({user: user});
         let userInfo: ScriptUser = {
           username: user.displayName ?? "",
           userID: user.uid,
@@ -117,27 +123,29 @@ export default class HomeProvider extends Component<Props, State> {
             .collection("users")
             .doc(user.uid)
             .set(userInfo);
-
-        firebase
-            .firestore()
-            .collection("scripts")
-            .onSnapshot((docs) =>
-            {
-              let data: Room[] = [];
-              docs.forEach((d) =>
-              {
-                data.push({id: d.id, ...d.data()} as Room);
-              });
-              this.setState({room: data});
-            });
-      } else {
-        this.setState({ user: null });
+        await this.refresh();
+      } else
+      {
+        this.setState({user: null});
         window.location.href = "#";
       }
     });
   }
 
-  post = async (docsId: string, value: any) => {
+  refresh = async () =>
+  {
+    this.setState({isLoading: true});
+    let docs = await firebase.firestore().collection("scripts").get();
+    let data: Room[] = [];
+    docs.forEach((d) =>
+    {
+      data.push({id: d.id, ...d.data()} as Room);
+    });
+    this.setState({room: data, isLoading: false});
+  };
+
+  post = async (docsId: string, value: any) =>
+  {
     let content: Content = {
       id: uuidv4(),
       time: firebase.firestore.Timestamp.fromMillis(Date.now()),

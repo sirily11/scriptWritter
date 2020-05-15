@@ -1,14 +1,14 @@
-import React from "react";
+import React                                        from "react";
 
 import "./App.css";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
-import { LoginPage } from "./components/login/LoginPage";
-import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core";
-import { blue, grey } from "@material-ui/core/colors";
-import HomeProvider from "./components/models/HomeContext";
-import { HomePage } from "./components/home/HomePage";
-import { RoomPage } from "./components/room/RoomPage";
-import EditorProvider from "./components/models/EditorContext";
+import {HashRouter as Router, Route, Switch}        from "react-router-dom";
+import {LoginPage}                                  from "./components/login/LoginPage";
+import {createMuiTheme, CssBaseline, ThemeProvider} from "@material-ui/core";
+import {blue, grey}                                 from "@material-ui/core/colors";
+import HomeProvider                                 from "./components/models/HomeContext";
+import {HomePage}                                   from "./components/home/HomePage";
+import EditorProvider                               from "./components/models/EditorContext";
+import {RoomPage}                                   from "./components/room/RoomPage";
 
 const theme = createMuiTheme({
   palette: {
@@ -18,7 +18,8 @@ const theme = createMuiTheme({
   },
 });
 
-function App() {
+function App()
+{
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

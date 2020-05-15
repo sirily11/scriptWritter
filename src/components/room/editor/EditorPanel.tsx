@@ -94,16 +94,17 @@ export function EditorPanel(props: Props)
           <Grid item xs={4} className={classes.chipContainer}>
             {props.room.settings.map((s, i) => (
                 <div key={`sc-${i}`}>
-              <Typography>{s.type}</Typography>
-              {s.details.map((sd, i) => (
-                <Chip
-                  clickable
-                  onClick={() => {
-                    insertSettings(sd, editor);
-                  }}
-                  key={`sd-${i}`}
-                  className={classes.chip}
-                  label={sd.title}
+                  <Typography>{s.type}</Typography>
+                  {s.details.map((sd, i) => (
+                      <Chip
+                          clickable
+                          onClick={() =>
+                          {
+                            insertSettings(sd, editor);
+                          }}
+                          key={`sd-${i}`}
+                          className={classes.chip}
+                          label={sd.title}
                 />
               ))}
             </div>
@@ -111,13 +112,13 @@ export function EditorPanel(props: Props)
         </Grid>
         <Grid item xs={8}>
           <Slate
-            editor={editor}
-            value={value}
-            onChange={(v) =>
-            {
-              if (props.room.id)
-                onChange(v, props.room.id, props.room.currentUsers);
-            }}
+              editor={editor}
+              value={value}
+              onChange={(v) =>
+              {
+                if (props.room.id)
+                  onChange(v, props.room.id, props.room.currentUsers);
+              }}
           >
             <Editable
                 className={classes.mainEditor}
@@ -138,15 +139,15 @@ export function EditorPanel(props: Props)
               style={{ marginRight: 10 }}
             >
               <Button
-                variant="contained"
-                onClick={async () =>
-                {
-                  setSelectedContent(undefined);
-                  if (props.room.id)
+                  variant="contained"
+                  onClick={async () =>
                   {
-                    await onSendEnd(props.room.id, props.room.currentUsers);
-                  }
-                }}
+                    setSelectedContent(undefined);
+                    if (props.room.id)
+                    {
+                      await onSendEnd(props.room.id, props.room.currentUsers);
+                    }
+                  }}
               >
                 Cancel
               </Button>
@@ -156,9 +157,10 @@ export function EditorPanel(props: Props)
               onClick={async () => {
                 setIsLoading(true);
                 if (props.room.id) {
-                  if (selectedContent) {
+                  if (selectedContent)
+                  {
                     await editPost(
-                      props.room.id,
+                        props.room.id,
                         selectedContent.id,
                         value,
                         props.room.content

@@ -152,7 +152,8 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
                 {
                   await updateSettings(index, props.id, title, props.settings);
                 }
-              } else {
+              } else
+              {
                 await createSettings(title, props.id, props.settings);
               }
             }
@@ -169,10 +170,10 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
           content={selectedDetails?.content}
           onDelete={async () => {
             if (
-              selectedSettings &&
-              selectedDetails &&
-              props.id &&
-              props.settings
+                selectedSettings &&
+                selectedDetails &&
+                props.id &&
+                props.settings
             )
             {
               let index = props.settings.findIndex(
@@ -198,11 +199,11 @@ export function LeftPart(props: { settings?: Settings[]; id?: string }) {
           }}
           onClose={async (title, content) => {
             if (
-              title &&
-              content &&
-              props.id &&
-              props.settings &&
-              selectedSettings
+                title &&
+                content &&
+                props.id &&
+                props.settings &&
+                selectedSettings
             )
             {
               let index = props.settings.findIndex(

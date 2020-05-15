@@ -70,12 +70,13 @@ export function ContentDisplay(props: Props)
           }}
       >
         <Editable
-        readOnly={true}
-        renderElement={(p) => {
-          let np = { ...p, room: room };
-          return <BlockRender {...np} />;
-        }}
-      />
-    </Slate>
+            readOnly={true}
+            renderElement={(p) =>
+            {
+              let np = {...p, room: room};
+              return <BlockRender {...np} />;
+            }}
+        />
+      </Slate>
   );
 }

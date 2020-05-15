@@ -43,7 +43,7 @@ const asyncFunctionDebounced = AwesomeDebouncePromise(async (text: Node[]) =>
     }
   });
   return pureText;
-}, 500);
+}, 5000);
 
 export const EditorContext = React.createContext(context);
 
@@ -132,7 +132,8 @@ export default class EditorProvider extends Component<Props, State>
     this.setState({selectedContent: content});
   };
 
-  insertSettings = (settings: SettingsDetail, editor: Editor) => {
+  insertSettings = (settings: SettingsDetail, editor: Editor) =>
+  {
     const node: Node = {
       type: "settings",
       children: [{text: settings.title}],

@@ -1,58 +1,72 @@
 // @flow
-import * as React from "react";
-import { useEffect, useState } from "react";
+import * as React                 from "react";
+import {useEffect, useState}      from "react";
 import {
-  AppBar,
-  Card,
-  CardActionArea,
-  Container,
-  Grid,
-  IconButton,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from "@material-ui/core";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import { HomeContext } from "../models/HomeContext";
-import AddIcon from "@material-ui/icons/Add";
-import { makeStyles } from "@material-ui/core/styles";
-import { CreateOrEditScriptDialog } from "./CreateOrEditScriptDialog";
+    AppBar,
+    Backdrop,
+    Card,
+    CardActionArea,
+    CircularProgress,
+    Container,
+    createStyles,
+    Grid,
+    IconButton,
+    Toolbar,
+    Tooltip,
+    Typography,
+}                                 from "@material-ui/core";
+import ExitToAppIcon              from "@material-ui/icons/ExitToApp";
+import {HomeContext}              from "../models/HomeContext";
+import AddIcon                    from "@material-ui/icons/Add";
+import {makeStyles}               from "@material-ui/core/styles";
+import {CreateOrEditScriptDialog} from "./CreateOrEditScriptDialog";
 
 type Props = {};
 
-const useStyle = makeStyles({
-  container: {
-    marginTop: 30,
-  },
-  card: {
-    height: 250,
-    display: "flex",
-  },
-  addIconContainer: {
-    height: 50,
-    width: "100%",
-    display: "flex",
-    marginTop: "auto",
-    marginBottom: "auto",
-  },
-  addIcon: {
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-});
+const useStyle = makeStyles((theme) =>
+    createStyles({
+        container: {
+            marginTop: 30,
+        },
+        card: {
+            height: 250,
+            display: "flex",
+        },
+        addIconContainer: {
+            height: 50,
+            width: "100%",
+            display: "flex",
+            marginTop: "auto",
+            marginBottom: "auto",
+        },
+        addIcon: {
+            marginLeft: "auto",
+            marginRight: "auto",
+        },
+        backdrop: {
+            zIndex: theme.zIndex.drawer + 1,
+            color: "#fff",
+        },
+    })
+);
 
-export function HomePage(props: Props) {
-  const { user, signOut, createScript, room } = React.useContext(HomeContext);
-  const [openDialog, setOpenDialog] = useState(false);
-  const classes = useStyle();
+export function HomePage(props: Props)
+{
+    const {user, signOut, createScript, room, isLoading} = React.useContext(
+        HomeContext
+    );
+    const [openDialog, setOpenDialog] = useState(false);
+    const classes = useStyle();
 
-  useEffect(() => {
-    if (user === null) {
-      window.location.href = "#";
-    }
-  }, [user]);
+    useEffect(() =>
+    {
+        if (user === null)
+        {
+            window.location.href = "#";
+        }
+    }, [user]);
 
-  return (
+    return (
     <div>
       <AppBar color="secondary" position="static">
         <Toolbar>
@@ -93,7 +107,7 @@ export function HomePage(props: Props) {
                     <div className={classes.addIcon}>
                       <Typography variant="h5">{r.title}</Typography>
                       <Typography noWrap style={{ maxWidth: 150 }}>
-                        {r.description}
+                          {r.description}
                       </Typography>
                     </div>
                   </div>
@@ -103,15 +117,20 @@ export function HomePage(props: Props) {
           ))}
         </Grid>
       </Container>
-      <CreateOrEditScriptDialog
-        open={openDialog}
-        onClose={async (title, description) => {
-          if (title && description) {
-            await createScript(title, description);
-          }
-          setOpenDialog(false);
-        }}
-      />
+        <Backdrop className={classes.backdrop} open={isLoading}>
+            <CircularProgress color="inherit"/>
+        </Backdrop>
+        <CreateOrEditScriptDialog
+            open={openDialog}
+            onClose={async (title, description) =>
+            {
+                if (title && description)
+                {
+                    await createScript(title, description);
+                }
+                setOpenDialog(false);
+            }}
+        />
     </div>
   );
 }
