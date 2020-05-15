@@ -21,15 +21,15 @@ const theme = createMuiTheme({
 function App()
 {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <EditorProvider>
-        <HomeProvider>
-          <Router>
-            <Switch>
-              <Route path="/" exact>
-                <LoginPage />
-              </Route>
+      <ThemeProvider theme={theme}>
+        <CssBaseline/>
+        <EditorProvider>
+          <HomeProvider>
+            <Router>
+              <Switch>
+                <Route path="/" exact>
+                  <LoginPage/>
+                </Route>
               <Route path="/home" exact>
                 <HomePage />
               </Route>

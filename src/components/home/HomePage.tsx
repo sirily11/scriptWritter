@@ -20,6 +20,7 @@ import {HomeContext}              from "../models/HomeContext";
 import AddIcon                    from "@material-ui/icons/Add";
 import {makeStyles}               from "@material-ui/core/styles";
 import {CreateOrEditScriptDialog} from "./CreateOrEditScriptDialog";
+import {PaginationButton}         from "./PaginationButton";
 
 type Props = {};
 
@@ -47,6 +48,13 @@ const useStyle = makeStyles((theme) =>
             zIndex: theme.zIndex.drawer + 1,
             color: "#fff",
         },
+        paginationBtn: {
+            zIndex: theme.zIndex.drawer + 1,
+
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+        },
     })
 );
 
@@ -67,16 +75,17 @@ export function HomePage(props: Props)
     }, [user]);
 
     return (
-    <div>
-      <AppBar color="secondary" position="static">
-        <Toolbar>
-          <IconButton
-            onClick={async () => {
-              await signOut();
-            }}
-          >
-            <ExitToAppIcon />
-          </IconButton>
+        <div>
+            <AppBar color="secondary" position="static">
+                <Toolbar>
+                    <IconButton
+                        onClick={async () =>
+                        {
+                            await signOut();
+                        }}
+                    >
+                        <ExitToAppIcon/>
+                    </IconButton>
         </Toolbar>
       </AppBar>
       <Container className={classes.container}>
@@ -106,9 +115,9 @@ export function HomePage(props: Props)
                   <div className={classes.addIconContainer}>
                     <div className={classes.addIcon}>
                       <Typography variant="h5">{r.title}</Typography>
-                      <Typography noWrap style={{ maxWidth: 150 }}>
-                          {r.description}
-                      </Typography>
+                        <Typography noWrap style={{maxWidth: 150}}>
+                            {r.description}
+                        </Typography>
                     </div>
                   </div>
                 </CardActionArea>
@@ -116,21 +125,24 @@ export function HomePage(props: Props)
             </Grid>
           ))}
         </Grid>
+          <div className={classes.paginationBtn}>
+              <PaginationButton/>
+          </div>
       </Container>
-        <Backdrop className={classes.backdrop} open={isLoading}>
-            <CircularProgress color="inherit"/>
-        </Backdrop>
-        <CreateOrEditScriptDialog
-            open={openDialog}
-            onClose={async (title, description) =>
-            {
-                if (title && description)
+            <Backdrop className={classes.backdrop} open={isLoading}>
+                <CircularProgress color="inherit"/>
+            </Backdrop>
+            <CreateOrEditScriptDialog
+                open={openDialog}
+                onClose={async (title, description) =>
                 {
-                    await createScript(title, description);
-                }
-                setOpenDialog(false);
-            }}
-        />
-    </div>
+                    if (title && description)
+                    {
+                        await createScript(title, description);
+                    }
+                    setOpenDialog(false);
+                }}
+            />
+        </div>
   );
 }

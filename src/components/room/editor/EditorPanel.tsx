@@ -105,30 +105,30 @@ export function EditorPanel(props: Props)
                           key={`sd-${i}`}
                           className={classes.chip}
                           label={sd.title}
-                />
-              ))}
-            </div>
-          ))}
-        </Grid>
-        <Grid item xs={8}>
-          <Slate
-              editor={editor}
-              value={value}
-              onChange={(v) =>
-              {
-                if (props.room.id)
-                  onChange(v, props.room.id, props.room.currentUsers);
-              }}
-          >
-            <Editable
-                className={classes.mainEditor}
-                renderElement={renderElement}
-            />
-          </Slate>
-          <Grid
-            container
-            alignItems="flex-start"
-            justify="flex-end"
+                      />
+                  ))}
+                </div>
+            ))}
+          </Grid>
+          <Grid item xs={8}>
+            <Slate
+                editor={editor}
+                value={value}
+                onChange={(v) =>
+                {
+                  if (props.room.id)
+                    onChange(v, props.room.id, props.room.currentUsers);
+                }}
+            >
+              <Editable
+                  className={classes.mainEditor}
+                  renderElement={renderElement}
+              />
+            </Slate>
+            <Grid
+                container
+                alignItems="flex-start"
+                justify="flex-end"
             direction="row"
             style={{ marginTop: 10 }}
           >

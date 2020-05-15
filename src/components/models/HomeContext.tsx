@@ -8,6 +8,14 @@ interface State
   user?: User | null;
   room: Room[];
   isLoading: boolean;
+  startIndex: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  arrayOfStart: any[];
+
+  next(): Promise<void>;
+
+  previous(): Promise<void>;
 
   refreshRoom(): Promise<void>;
 
@@ -69,28 +77,40 @@ interface State
   ): Promise<void>;
 
   deleteDetails(
-    index: number,
-    detailIndex: number,
-    docsId: string,
-    settings: Settings[]
+      index: number,
+      detailIndex: number,
+      docsId: string,
+      settings: Settings[]
   ): Promise<void>;
 }
 
-interface Props {}
+interface Props
+{
+}
 
 //@ts-ignore
 const context: State = {};
 
 export const HomeContext = React.createContext(context);
 
-export default class HomeProvider extends Component<Props, State> {
-  constructor(props: Props) {
+const numberPerPage = 10;
+
+export default class HomeProvider extends Component<Props, State>
+{
+  constructor(props: Props)
+  {
     super(props);
     this.state = {
+      startIndex: 0,
+      arrayOfStart: [undefined],
+      hasNext: false,
+      hasPrevious: false,
       signOut: this.signOut,
       isLoading: false,
       login: this.login,
       signUp: this.signUp,
+      next: this.next,
+      previous: this.previous,
       createScript: this.createScript,
       createDetails: this.createDetails,
       createSettings: this.createSettings,
@@ -108,8 +128,9 @@ export default class HomeProvider extends Component<Props, State> {
   }
 
   async componentDidMount() {
-    // await firebase.firestore().enablePersistence();
-    firebase.auth().onAuthStateChanged(async (user) => {
+    await firebase.firestore().enablePersistence();
+    firebase.auth().onAuthStateChanged(async (user) =>
+    {
       if (user)
       {
         this.setState({user: user});
@@ -132,16 +153,66 @@ export default class HomeProvider extends Component<Props, State> {
     });
   }
 
-  refresh = async () =>
+  next = async () =>
   {
+    const {startIndex, arrayOfStart} = this.state;
+    let newIndex = startIndex + 1;
+    let head = arrayOfStart[newIndex];
+    this.setState({
+      startIndex: newIndex,
+      hasPrevious: true,
+    });
+    await this.refresh(head);
+  };
+
+  previous = async () =>
+  {
+    const {startIndex, arrayOfStart} = this.state;
+
+    let newIndex = startIndex - 1;
+    let head = arrayOfStart[newIndex];
+    this.setState({startIndex: newIndex, hasPrevious: newIndex > 0});
+    await this.refresh(head);
+  };
+
+  refresh = async (head?: any) =>
+  {
+    const {arrayOfStart} = this.state;
     this.setState({isLoading: true});
-    let docs = await firebase.firestore().collection("scripts").get();
+    let docsRef = firebase
+        .firestore()
+        .collection("scripts")
+        .orderBy("title", "asc");
+    if (head)
+    {
+      docsRef = docsRef.startAt(head);
+    }
+    let docs = await docsRef.limit(numberPerPage + 1).get();
+
     let data: Room[] = [];
+    let index = 0;
+    const hasNext = docs.size === numberPerPage + 1;
     docs.forEach((d) =>
     {
+      if (index === docs.size - 1 && hasNext)
+      {
+        // push last doc into start array
+        if (!arrayOfStart.includes(d))
+        {
+          console.log("Push doc");
+          arrayOfStart.push(d);
+        }
+      }
       data.push({id: d.id, ...d.data()} as Room);
+      index += 1;
     });
-    this.setState({room: data, isLoading: false});
+
+    this.setState({
+      room: data.slice(0, numberPerPage),
+      isLoading: false,
+      hasNext: hasNext,
+      arrayOfStart: arrayOfStart,
+    });
   };
 
   post = async (docsId: string, value: any) =>
@@ -255,7 +326,6 @@ export default class HomeProvider extends Component<Props, State> {
     content: string,
     settings: Settings[]
   ) => {
-    console.log(settings, index, detailIndex);
     settings[index].details[detailIndex].title = title;
     settings[index].details[detailIndex].content = content;
 
